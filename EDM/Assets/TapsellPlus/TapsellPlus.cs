@@ -1,7 +1,7 @@
+using GoogleMobileAds.Api;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using GoogleMobileAds.Api;
 using UnityEngine;
 using UnityEngine.Networking;
 using Object = UnityEngine.Object;
@@ -13,26 +13,26 @@ namespace TapsellPlusSDK
         private static Action<string> _successInitializeCallback;
         private static Action<TapsellPlusAdNetworkError> _failedInitializeCallback;
 
-        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> RequestResponseCallbackPool =
-            new Dictionary<String, Action<TapsellPlusAdModel>>();
+        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> RequestResponseCallbackPool
+            = new Dictionary<string, Action<TapsellPlusAdModel>>();
 
-        private static readonly Dictionary<string, Action<TapsellPlusRequestError>> RequestErrorCallbackPool =
-            new Dictionary<String, Action<TapsellPlusRequestError>>();
+        private static readonly Dictionary<string, Action<TapsellPlusRequestError>> RequestErrorCallbackPool
+            = new Dictionary<string, Action<TapsellPlusRequestError>>();
 
-        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> OpenAdCallbackPool =
-            new Dictionary<String, Action<TapsellPlusAdModel>>();
+        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> OpenAdCallbackPool
+            = new Dictionary<string, Action<TapsellPlusAdModel>>();
 
-        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> CloseAdCallbackPool =
-            new Dictionary<String, Action<TapsellPlusAdModel>>();
+        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> CloseAdCallbackPool
+            = new Dictionary<string, Action<TapsellPlusAdModel>>();
 
-        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> RewardAdCallbackPool =
-            new Dictionary<String, Action<TapsellPlusAdModel>>();
+        private static readonly Dictionary<string, Action<TapsellPlusAdModel>> RewardAdCallbackPool
+            = new Dictionary<string, Action<TapsellPlusAdModel>>();
 
-        private static readonly Dictionary<string, Action<TapsellPlusErrorModel>> ShowErrorAdCallbackPool =
-            new Dictionary<String, Action<TapsellPlusErrorModel>>();
+        private static readonly Dictionary<string, Action<TapsellPlusErrorModel>> ShowErrorAdCallbackPool
+            = new Dictionary<string, Action<TapsellPlusErrorModel>>();
 
-        private static readonly Dictionary<string, Action<TapsellPlusNativeBannerAd>> OpenNativeAdCallbackPool =
-            new Dictionary<String, Action<TapsellPlusNativeBannerAd>>();
+        private static readonly Dictionary<string, Action<TapsellPlusNativeBannerAd>> OpenNativeAdCallbackPool
+            = new Dictionary<string, Action<TapsellPlusNativeBannerAd>>();
 
         private static MonoBehaviour _mMonoBehaviour;
         private static GameObject _tapsellPlusManager;
@@ -192,7 +192,7 @@ namespace TapsellPlusSDK
                 if (_mMonoBehaviour != null && _mMonoBehaviour.isActiveAndEnabled)
                 {
                     if (tapsellPlusNativeAd.generalNativeAdModel.adNetwork.Equals("TAPSELL",
-                            StringComparison.InvariantCultureIgnoreCase))
+                        StringComparison.InvariantCultureIgnoreCase))
                         _mMonoBehaviour.StartCoroutine(LoadTapsellNativeAdComponents(tapsellPlusNativeAd));
                 }
                 else
@@ -210,6 +210,8 @@ namespace TapsellPlusSDK
             }
         }
 
+
+
         private static IEnumerator LoadTapsellNativeAdComponents(TapsellPlusNativeAd tapsellPlusNativeAd)
         {
             var tapsellNativeAd = tapsellPlusNativeAd.generalNativeAdModel;
@@ -220,33 +222,51 @@ namespace TapsellPlusSDK
             {
                 var wwwIcon = UnityWebRequestTexture.GetTexture(tapsellNativeAd.iconUrl);
                 yield return wwwIcon.SendWebRequest();
+
+#if UNITY_2020_3_OR_NEWER
+
                 if (wwwIcon.result == UnityWebRequest.Result.ConnectionError ||
                     wwwIcon.result == UnityWebRequest.Result.ProtocolError)
+#else
+                if (!string.IsNullOrWhiteSpace(wwwIcon.error))
+#endif
                     Debug.Log(wwwIcon.error);
                 else
-                    iconImage = ((DownloadHandlerTexture) wwwIcon.downloadHandler).texture;
+                    iconImage = ((DownloadHandlerTexture)wwwIcon.downloadHandler).texture;
+
+
+
+
             }
 
             if (tapsellNativeAd.portraitStaticImageUrl != null && !tapsellNativeAd.portraitStaticImageUrl.Equals(""))
             {
                 var wwwPortrait = UnityWebRequestTexture.GetTexture(tapsellNativeAd.portraitStaticImageUrl);
                 yield return wwwPortrait.SendWebRequest();
+#if UNITY_2020_3_OR_NEWER
                 if (wwwPortrait.result == UnityWebRequest.Result.ConnectionError ||
                     wwwPortrait.result == UnityWebRequest.Result.ProtocolError)
+#else
+                if (!string.IsNullOrWhiteSpace(wwwPortrait.error))
+#endif
                     Debug.Log(wwwPortrait.error);
                 else
-                    portraitBannerImage = ((DownloadHandlerTexture) wwwPortrait.downloadHandler).texture;
+                    portraitBannerImage = ((DownloadHandlerTexture)wwwPortrait.downloadHandler).texture;
             }
 
             if (tapsellNativeAd.landscapeStaticImageUrl != null && !tapsellNativeAd.landscapeStaticImageUrl.Equals(""))
             {
                 var wwwLandscape = UnityWebRequestTexture.GetTexture(tapsellNativeAd.landscapeStaticImageUrl);
                 yield return wwwLandscape.SendWebRequest();
+#if UNITY_2020_3_OR_NEWER
                 if (wwwLandscape.result == UnityWebRequest.Result.ConnectionError ||
                     wwwLandscape.result == UnityWebRequest.Result.ProtocolError)
+#else
+                if (!string.IsNullOrWhiteSpace(wwwLandscape.error))
+#endif
                     Debug.Log(wwwLandscape.error);
                 else
-                    landscapeBannerImage = ((DownloadHandlerTexture) wwwLandscape.downloadHandler).texture;
+                    landscapeBannerImage = ((DownloadHandlerTexture)wwwLandscape.downloadHandler).texture;
             }
 
             var tapsellPlusNativeBannerAd
@@ -255,6 +275,7 @@ namespace TapsellPlusSDK
                     tapsellNativeAd.description, tapsellNativeAd.callToActionText,
                     portraitBannerImage, landscapeBannerImage,
                     iconImage, null);
+
             CallIfAvailable(OpenNativeAdCallbackPool, tapsellPlusNativeAd.responseId, tapsellPlusNativeBannerAd);
         }
 
