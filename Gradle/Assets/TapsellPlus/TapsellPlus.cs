@@ -1,7 +1,7 @@
+using GoogleMobileAds.Api;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using GoogleMobileAds.Api;
 using UnityEngine;
 using UnityEngine.Networking;
 using Object = UnityEngine.Object;
@@ -210,6 +210,8 @@ namespace TapsellPlusSDK
             }
         }
 
+
+
         private static IEnumerator LoadTapsellNativeAdComponents(TapsellPlusNativeAd tapsellPlusNativeAd)
         {
             var tapsellNativeAd = tapsellPlusNativeAd.generalNativeAdModel;
@@ -220,33 +222,51 @@ namespace TapsellPlusSDK
             {
                 var wwwIcon = UnityWebRequestTexture.GetTexture(tapsellNativeAd.iconUrl);
                 yield return wwwIcon.SendWebRequest();
+
+#if UNITY_2020_3_OR_NEWER
+
                 if (wwwIcon.result == UnityWebRequest.Result.ConnectionError ||
                     wwwIcon.result == UnityWebRequest.Result.ProtocolError)
+#else
+                if (!string.IsNullOrWhiteSpace(wwwIcon.error))
+#endif
                     Debug.Log(wwwIcon.error);
                 else
-                    iconImage = ((DownloadHandlerTexture) wwwIcon.downloadHandler).texture;
+                    iconImage = ((DownloadHandlerTexture)wwwIcon.downloadHandler).texture;
+
+
+
+
             }
 
             if (tapsellNativeAd.portraitStaticImageUrl != null && !tapsellNativeAd.portraitStaticImageUrl.Equals(""))
             {
                 var wwwPortrait = UnityWebRequestTexture.GetTexture(tapsellNativeAd.portraitStaticImageUrl);
                 yield return wwwPortrait.SendWebRequest();
+#if UNITY_2020_3_OR_NEWER
                 if (wwwPortrait.result == UnityWebRequest.Result.ConnectionError ||
                     wwwPortrait.result == UnityWebRequest.Result.ProtocolError)
+#else
+                if (!string.IsNullOrWhiteSpace(wwwPortrait.error))
+#endif
                     Debug.Log(wwwPortrait.error);
                 else
-                    portraitBannerImage = ((DownloadHandlerTexture) wwwPortrait.downloadHandler).texture;
+                    portraitBannerImage = ((DownloadHandlerTexture)wwwPortrait.downloadHandler).texture;
             }
 
             if (tapsellNativeAd.landscapeStaticImageUrl != null && !tapsellNativeAd.landscapeStaticImageUrl.Equals(""))
             {
                 var wwwLandscape = UnityWebRequestTexture.GetTexture(tapsellNativeAd.landscapeStaticImageUrl);
                 yield return wwwLandscape.SendWebRequest();
+#if UNITY_2020_3_OR_NEWER
                 if (wwwLandscape.result == UnityWebRequest.Result.ConnectionError ||
                     wwwLandscape.result == UnityWebRequest.Result.ProtocolError)
+#else
+                if (!string.IsNullOrWhiteSpace(wwwLandscape.error))
+#endif
                     Debug.Log(wwwLandscape.error);
                 else
-                    landscapeBannerImage = ((DownloadHandlerTexture) wwwLandscape.downloadHandler).texture;
+                    landscapeBannerImage = ((DownloadHandlerTexture)wwwLandscape.downloadHandler).texture;
             }
 
             var tapsellPlusNativeBannerAd
@@ -255,6 +275,7 @@ namespace TapsellPlusSDK
                     tapsellNativeAd.description, tapsellNativeAd.callToActionText,
                     portraitBannerImage, landscapeBannerImage,
                     iconImage, null);
+
             CallIfAvailable(OpenNativeAdCallbackPool, tapsellPlusNativeAd.responseId, tapsellPlusNativeBannerAd);
         }
 
@@ -355,7 +376,7 @@ namespace TapsellPlusSDK
 
         public static void SetGdprConsent(bool consent)
         {
-#if UNITY_ANDROID && !UNITY_EDITOR            
+#if UNITY_ANDROID && !UNITY_EDITOR
             _plugin.SetGdprConsent(consent);
 #endif
         }
